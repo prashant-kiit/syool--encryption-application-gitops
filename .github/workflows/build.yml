@@ -1,0 +1,54 @@
+name: CD Pipeline - Deploy to EC2
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - "docker-compose.prod.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout GitOps Repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H 3.111.34.137 >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key ubuntu@3.111.34.137 << 'EOF'
+            set -e
+            GITOPS_DIR="/home/ubuntu/syook-encryption-gitops"
+            REPO_URL="https://github.com/prashant-kiit/syool--encryption-application-gitops.git"
+
+            if [ ! -d "$GITOPS_DIR" ]; then
+              git clone "$REPO_URL" "$GITOPS_DIR"
+            else
+              cd "$GITOPS_DIR"
+              git pull origin master
+            fi
+
+            cd "$GITOPS_DIR"
+
+            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f
+          EOF
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Verify Deployment
+        run: |
+          ssh -i ~/.ssh/deploy_key ubuntu@3.111.34.137 << 'EOF'
+            cd /home/ubuntu/syook-encryption-gitops
+            docker compose -f docker-compose.prod.yml ps
+          EOF
