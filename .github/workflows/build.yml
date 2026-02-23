@@ -26,15 +26,16 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key ubuntu@65.0.176.141 \
             -o StrictHostKeyChecking=no \
-            "DOCKERHUB_USERNAME='$DOCKERHUB_USERNAME' DOCKERHUB_TOKEN='$DOCKERHUB_TOKEN' bash -s" << 'EOF'
+            "DOCKERHUB_USERNAME='$DOCKERHUB_USERNAME' DOCKERHUB_TOKEN='$DOCKERHUB_TOKEN' GITOPS_PAT='$GITOPS_PAT' bash -s" << 'EOF'
             set -e
             GITOPS_DIR="/home/ubuntu/syook-encryption-gitops"
-            REPO_URL="https://github.com/prashant-kiit/syook--encryption-application-gitops.git"
+            REPO_URL="https://${GITOPS_PAT}@github.com/prashant-kiit/syool--encryption-application-gitops.git"
 
             if [ ! -d "$GITOPS_DIR" ]; then
               git clone "$REPO_URL" "$GITOPS_DIR"
             else
               cd "$GITOPS_DIR"
+              git remote set-url origin "$REPO_URL"
               git pull origin master
             fi
 
@@ -48,6 +49,7 @@ jobs:
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          GITOPS_PAT: ${{ secrets.GITOPS_PAT }}
 
       - name: Verify Deployment
         run: |
