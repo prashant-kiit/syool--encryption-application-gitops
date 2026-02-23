@@ -1,0 +1,86 @@
+services:
+  emitter-service:
+    image: YOUR_DOCKERHUB_USERNAME/emitter-service:latest
+    container_name: emitter-service
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - encryption-app-network
+
+  listener-service:
+    image: YOUR_DOCKERHUB_USERNAME/listener-service:latest
+    container_name: listener-service
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    networks:
+      - encryption-app-network
+
+  dashboard-backend:
+    image: YOUR_DOCKERHUB_USERNAME/dashboard-backend:latest
+    container_name: dashboard-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    networks:
+      - encryption-app-network
+
+  dashboard-frontend:
+    image: YOUR_DOCKERHUB_USERNAME/dashboard-frontend:latest
+    container_name: dashboard-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - dashboard-backend
+    networks:
+      - encryption-app-network
+
+  redis:
+    image: redis:latest
+    container_name: redis-service
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - encryption-app-network
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb-service
+    restart: unless-stopped
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: listener_db
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-keyfile:/etc/mongo-keyfile:ro
+    networks:
+      - encryption-app-network
+
+  mongo-init:
+    image: mongo:7
+    depends_on:
+      - mongodb
+    restart: "no"
+    entrypoint: >
+      bash -c "sleep 5 &&
+      mongosh mongodb://admin:admin123@mongodb-service:27017/admin?authSource=admin --eval
+      'rs.initiate({_id:\"rs0\",members:[{_id:0,host:\"mongodb-service:27017\"}]})'"
+    networks:
+      - encryption-app-network
+
+networks:
+  encryption-app-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+  mongo_data:
