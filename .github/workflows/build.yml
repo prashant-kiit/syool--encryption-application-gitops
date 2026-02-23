@@ -19,12 +19,12 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H 65.0.176.141  >> ~/.ssh/known_hosts
+          ssh-keyscan -H 13.127.215.4  >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/deploy_key ubuntu@65.0.176.141 \
+          ssh -i ~/.ssh/deploy_key ubuntu@13.127.215.4 \
             -o StrictHostKeyChecking=no \
             "DOCKERHUB_USERNAME='$DOCKERHUB_USERNAME' DOCKERHUB_TOKEN='$DOCKERHUB_TOKEN' GITOPS_PAT='$GITOPS_PAT' bash -s" << 'EOF'
             set -e
@@ -53,7 +53,7 @@ jobs:
 
       - name: Verify Deployment
         run: |
-          ssh -i ~/.ssh/deploy_key ubuntu@65.0.176.141  << 'EOF'
+          ssh -i ~/.ssh/deploy_key ubuntu@13.127.215.4  << 'EOF'
             cd /home/ubuntu/syook-encryption-gitops
             docker compose -f docker-compose.prod.yml ps
           EOF
