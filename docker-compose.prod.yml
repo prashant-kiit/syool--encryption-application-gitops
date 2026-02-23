@@ -1,6 +1,6 @@
 services:
   emitter-service:
-    image: YOUR_DOCKERHUB_USERNAME/emitter-service:latest
+    image: prashantdocker090798/emitter-service:latest
     container_name: emitter-service
     restart: unless-stopped
     ports:
@@ -9,7 +9,7 @@ services:
       - encryption-app-network
 
   listener-service:
-    image: YOUR_DOCKERHUB_USERNAME/listener-service:latest
+    image: prashantdocker090798/listener-service:latest
     container_name: listener-service
     restart: unless-stopped
     ports:
@@ -18,7 +18,7 @@ services:
       - encryption-app-network
 
   dashboard-backend:
-    image: YOUR_DOCKERHUB_USERNAME/dashboard-backend:latest
+    image: prashantdocker090798/dashboard-backend:latest
     container_name: dashboard-backend
     restart: unless-stopped
     ports:
@@ -27,7 +27,7 @@ services:
       - encryption-app-network
 
   dashboard-frontend:
-    image: YOUR_DOCKERHUB_USERNAME/dashboard-frontend:latest
+    image: prashantdocker090798/dashboard-frontend:latest
     container_name: dashboard-frontend
     restart: unless-stopped
     ports:
