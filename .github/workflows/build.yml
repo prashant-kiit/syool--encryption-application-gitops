@@ -22,7 +22,7 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/deploy_key ubuntu@3.111.34.137 << 'EOF'
+          ssh -i ~/.ssh/deploy_key ubuntu@15.207.254.253 << 'EOF'
             set -e
             GITOPS_DIR="/home/ubuntu/syook-encryption-gitops"
             REPO_URL="https://github.com/prashant-kiit/syool--encryption-application-gitops.git"
