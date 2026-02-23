@@ -19,15 +19,17 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H 15.207.254.253 >> ~/.ssh/known_hosts
+          ssh-keyscan -H 65.0.176.141  >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/deploy_key ubuntu@15.207.254.253 << 'EOF'
+          ssh -i ~/.ssh/deploy_key ubuntu@65.0.176.141 \
+            -o StrictHostKeyChecking=no \
+            "DOCKERHUB_USERNAME='$DOCKERHUB_USERNAME' DOCKERHUB_TOKEN='$DOCKERHUB_TOKEN' bash -s" << 'EOF'
             set -e
             GITOPS_DIR="/home/ubuntu/syook-encryption-gitops"
-            REPO_URL="https://github.com/prashant-kiit/syool--encryption-application-gitops.git"
+            REPO_URL="https://github.com/prashant-kiit/syook--encryption-application-gitops.git"
 
             if [ ! -d "$GITOPS_DIR" ]; then
               git clone "$REPO_URL" "$GITOPS_DIR"
@@ -49,7 +51,7 @@ jobs:
 
       - name: Verify Deployment
         run: |
-          ssh -i ~/.ssh/deploy_key ubuntu@15.207.254.253 << 'EOF'
+          ssh -i ~/.ssh/deploy_key ubuntu@65.0.176.141  << 'EOF'
             cd /home/ubuntu/syook-encryption-gitops
             docker compose -f docker-compose.prod.yml ps
           EOF
