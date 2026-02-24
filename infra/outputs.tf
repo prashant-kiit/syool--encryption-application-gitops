@@ -13,7 +13,12 @@ output "public_dns" {
   value       = aws_instance.ec2_instance.public_dns
 }
 
+output "ec2_elastic_ip" {
+  description = "Elastic IP associated with the EC2 instance"
+  value = aws_eip.ec2_eip.public_ip
+}
+
 output "ssh_command" {
   description = "SSH command to connect to the EC2 instance"
-  value       = "ssh -i ${var.private_key_path} ubuntu@${aws_instance.ec2_instance.public_ip}"
+  value = "ssh -i ~/.ssh/${var.private_key_path} ubuntu@${aws_eip.ec2_eip.public_ip}"
 }

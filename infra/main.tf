@@ -49,7 +49,6 @@ resource "aws_instance" "ec2_instance" {
   key_name               = aws_key_pair.ec2_key.key_name
   vpc_security_group_ids = [aws_security_group.ssh_sg.id]
 
-  # Increase root volume to comfortably hold Docker images
   root_block_device {
     volume_size           = 20
     volume_type           = "gp3"
@@ -60,11 +59,9 @@ resource "aws_instance" "ec2_instance" {
     #!/bin/bash
     set -e
 
-    # ── System update ────────────────────────────────────────────────
     apt-get update -y
     apt-get upgrade -y
 
-    # ── Docker prerequisites ─────────────────────────────────────────
     apt-get install -y \
       ca-certificates \
       curl \
@@ -72,7 +69,6 @@ resource "aws_instance" "ec2_instance" {
       lsb-release \
       git
 
-    # ── Add Docker's official GPG key & repo ─────────────────────────
     install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
       | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -84,7 +80,6 @@ resource "aws_instance" "ec2_instance" {
       $(lsb_release -cs) stable" \
       | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-    # ── Install Docker Engine + Compose plugin ────────────────────────
     apt-get update -y
     apt-get install -y \
       docker-ce \
@@ -93,19 +88,25 @@ resource "aws_instance" "ec2_instance" {
       docker-buildx-plugin \
       docker-compose-plugin
 
-    # ── Enable & start Docker ─────────────────────────────────────────
     systemctl enable docker
     systemctl start docker
 
-    # ── Allow ubuntu user to run Docker without sudo ──────────────────
     usermod -aG docker ubuntu
 
-    # ── Verify installations (logged to /var/log/user-data.log) ───────
     docker --version
     docker compose version
   EOF
 
   tags = {
     Name = var.instance_name
+  }
+}
+
+resource "aws_eip" "ec2_eip" {
+  instance = aws_instance.ec2_instance.id
+  domain   = "vpc"
+
+  tags = {
+    Name = "${var.instance_name}-eip"
   }
 }
