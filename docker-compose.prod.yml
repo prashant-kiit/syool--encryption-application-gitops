@@ -1,6 +1,6 @@
 services:
   emitter-service:
-    image: prashantdocker090798/emitter-service:9d4ebb3b5c2f1d3b4ac56356518b5150cf64bfb2
+    image: prashantdocker090798/emitter-service:571a00690140cd6bdaf73b9267ab8313e05eabca
     container_name: emitter-service
     restart: unless-stopped
     ports:
@@ -9,7 +9,7 @@ services:
       - encryption-app-network
 
   listener-service:
-    image: prashantdocker090798/listener-service:9d4ebb3b5c2f1d3b4ac56356518b5150cf64bfb2
+    image: prashantdocker090798/listener-service:571a00690140cd6bdaf73b9267ab8313e05eabca
     container_name: listener-service
     restart: unless-stopped
     ports:
@@ -18,7 +18,7 @@ services:
       - encryption-app-network
 
   dashboard-backend:
-    image: prashantdocker090798/dashboard-backend:9d4ebb3b5c2f1d3b4ac56356518b5150cf64bfb2
+    image: prashantdocker090798/dashboard-backend:571a00690140cd6bdaf73b9267ab8313e05eabca
     container_name: dashboard-backend
     restart: unless-stopped
     ports:
@@ -27,7 +27,7 @@ services:
       - encryption-app-network
 
   dashboard-frontend:
-    image: prashantdocker090798/dashboard-frontend:9d4ebb3b5c2f1d3b4ac56356518b5150cf64bfb2
+    image: prashantdocker090798/dashboard-frontend:571a00690140cd6bdaf73b9267ab8313e05eabca
     container_name: dashboard-frontend
     restart: unless-stopped
     ports:
